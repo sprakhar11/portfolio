@@ -107,18 +107,24 @@ export const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8 }}
           >
-            <a 
-              href="#experience" 
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-full font-semibold transition-all hover:bg-blue-600 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] cursor-pointer text-sm sm:text-base"
             >
               View Experience
-            </a>
-            <a 
-              href="#contact" 
+            </button>
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-transparent border border-slate-700 text-white rounded-full font-semibold transition-all hover:bg-slate-800 hover:border-slate-500 cursor-pointer text-sm sm:text-base"
             >
               Contact Me
-            </a>
+            </button>
           </motion.div>
         </motion.div>
       </div>
