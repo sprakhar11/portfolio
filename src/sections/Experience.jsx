@@ -12,10 +12,10 @@ export const Experience = () => {
         transition={{ duration: 0.8 }}
         className="text-center mb-16"
       >
-        <h2 className="text-4xl md:text-5xl font-bold mb-4 font-mono">
+        <h2 className="text-4xl md:text-5xl font-bold mb-4 font-mono text-slate-800 dark:text-white transition-colors">
           <span className="text-primary">&lt;</span> Experience & Education <span className="text-primary">/&gt;</span>
         </h2>
-        <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+        <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-lg transition-colors">
           My professional journey and academic background.
         </p>
       </motion.div>
@@ -28,10 +28,10 @@ export const Experience = () => {
             <div className="bg-primary/10 p-3 rounded-lg text-primary">
               <Briefcase size={24} />
             </div>
-            <h3 className="text-2xl font-bold text-white">Work Experience</h3>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-white transition-colors">Work Experience</h3>
           </div>
           
-          <div className="relative border-l border-slate-800 ml-6 space-y-8 pb-4">
+          <div className="relative border-l border-slate-300 dark:border-slate-800 ml-6 space-y-8 pb-4 transition-colors">
             {experienceData.map((item, index) => (
               <motion.div 
                 key={item.id}
@@ -41,28 +41,28 @@ export const Experience = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="relative pl-8 group"
               >
-                <div className="absolute w-4 h-4 bg-slate-900 border-2 border-primary rounded-full -left-[9px] top-1 group-hover:bg-primary transition-colors shadow-[0_0_10px_rgba(59,130,246,0.3)]" />
+                <div className="absolute w-4 h-4 bg-white dark:bg-slate-900 border-2 border-primary rounded-full -left-[9px] top-1 group-hover:bg-primary transition-colors shadow-[0_0_10px_rgba(59,130,246,0.3)]" />
                 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 sm:gap-2 mb-2">
-                  <h4 className="text-lg sm:text-xl font-bold text-slate-200 group-hover:text-primary transition-colors">{item.role}</h4>
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-400 font-mono bg-slate-800/50 px-2 sm:px-3 py-1 rounded-full w-fit">
+                  <h4 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">{item.role}</h4>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800/50 px-2 sm:px-3 py-1 rounded-full w-fit transition-colors">
                     <Calendar size={12} className="sm:w-[14px] sm:h-[14px]" />
                     {item.period}
                   </div>
                 </div>
                 
-                <h5 className="text-base sm:text-lg text-slate-300 font-medium mb-1">{item.company}</h5>
+                <h5 className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium mb-1 transition-colors">{item.company}</h5>
                 {item.techStack && (
                   <p className="text-[10px] sm:text-xs font-mono text-primary/80 mb-3 sm:mb-4">{item.techStack}</p>
                 )}
                 {item.bullets ? (
-                  <ul className="list-disc list-outside ml-4 space-y-2 text-slate-400 text-sm">
+                  <ul className="list-disc list-outside ml-4 space-y-2 text-slate-600 dark:text-slate-400 text-sm transition-colors">
                     {item.bullets.map((bullet, i) => {
                       const splitIndex = bullet.indexOf(':');
                       if (splitIndex !== -1) {
                         return (
                           <li key={i} className="leading-relaxed">
-                            <strong className="text-slate-300">{bullet.substring(0, splitIndex + 1)}</strong>
+                            <strong className="text-slate-800 dark:text-slate-300 transition-colors">{bullet.substring(0, splitIndex + 1)}</strong>
                             {bullet.substring(splitIndex + 1)}
                           </li>
                         );
@@ -71,7 +71,7 @@ export const Experience = () => {
                     })}
                   </ul>
                 ) : (
-                  <p className="text-slate-400 leading-relaxed text-sm">
+                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm transition-colors">
                     {item.description}
                   </p>
                 )}
@@ -86,10 +86,10 @@ export const Experience = () => {
             <div className="bg-accent/10 p-3 rounded-lg text-accent">
               <GraduationCap size={24} />
             </div>
-            <h3 className="text-2xl font-bold text-white">Education</h3>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-white transition-colors">Education</h3>
           </div>
           
-          <div className="relative border-l border-slate-800 ml-6 space-y-8">
+          <div className="relative border-l border-slate-300 dark:border-slate-800 ml-6 space-y-8 transition-colors">
             {educationData.map((item, index) => (
               <motion.div 
                 key={item.id}
@@ -99,18 +99,18 @@ export const Experience = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="relative pl-8 group"
               >
-                <div className="absolute w-4 h-4 bg-slate-900 border-2 border-accent rounded-full -left-[9px] top-1 group-hover:bg-accent transition-colors shadow-[0_0_10px_rgba(139,92,246,0.3)]" />
+                <div className="absolute w-4 h-4 bg-white dark:bg-slate-900 border-2 border-accent rounded-full -left-[9px] top-1 group-hover:bg-accent transition-colors shadow-[0_0_10px_rgba(139,92,246,0.3)]" />
                 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 sm:gap-2 mb-2">
-                  <h4 className="text-lg sm:text-xl font-bold text-slate-200 group-hover:text-accent transition-colors">{item.degree}</h4>
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-400 font-mono bg-slate-800/50 px-2 sm:px-3 py-1 rounded-full w-fit">
+                  <h4 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200 group-hover:text-accent transition-colors">{item.degree}</h4>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800/50 px-2 sm:px-3 py-1 rounded-full w-fit transition-colors">
                     <Calendar size={12} className="sm:w-[14px] sm:h-[14px]" />
                     {item.period}
                   </div>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row justify-between gap-2 sm:items-center mb-1">
-                  <h5 className="text-base sm:text-lg text-slate-300 font-medium">{item.institution}</h5>
+                  <h5 className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium transition-colors">{item.institution}</h5>
                   <span className="text-accent text-xs sm:text-sm font-semibold bg-accent/10 px-2 sm:px-3 py-1 rounded w-fit">
                     {item.score}
                   </span>

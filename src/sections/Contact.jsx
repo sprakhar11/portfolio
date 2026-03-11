@@ -15,8 +15,8 @@ export const Contact = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="text-5xl md:text-7xl font-black mb-8 text-white">Let's Connect</h2>
-          <p className="text-xl md:text-2xl text-slate-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+          <h2 className="text-5xl md:text-7xl font-black mb-8 text-slate-900 dark:text-white transition-colors">Let's Connect</h2>
+          <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed transition-colors">
             I'm currently exploring new opportunities. Whether you have a question or just want to say hi, my inbox is always open.
           </p>
           
@@ -25,7 +25,7 @@ export const Contact = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 href={`mailto:${siteConfig.email}`}
-                className="flex items-center justify-center gap-3 w-full sm:w-auto px-10 py-5 bg-white text-slate-900 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all"
+                className="flex items-center justify-center gap-3 w-full sm:w-auto px-10 py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all"
             >
               <Mail size={24} />
               Say Hello
@@ -37,7 +37,7 @@ export const Contact = () => {
                  href={`https://github.com/${siteConfig.githubUsername}`} 
                  target="_blank" 
                  rel="noreferrer"
-                 className="p-5 bg-slate-900 rounded-full border border-slate-800 text-slate-300 hover:text-white transition-colors"
+                 className="p-5 bg-slate-100 dark:bg-slate-900 rounded-full border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-white transition-colors"
                  title="GitHub"
                >
                  <Github size={24} />
@@ -47,7 +47,7 @@ export const Contact = () => {
                  href={`https://linkedin.com/in/${siteConfig.linkedin}`} 
                  target="_blank" 
                  rel="noreferrer"
-                 className="p-5 bg-slate-900 rounded-full border border-slate-800 text-slate-300 hover:text-white transition-colors"
+                 className="p-5 bg-slate-100 dark:bg-slate-900 rounded-full border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-white transition-colors"
                  title="LinkedIn"
                >
                  <Linkedin size={24} />
@@ -82,7 +82,7 @@ export const Contact = () => {
           </div>
           
           {/* Desktop visible phone number below links */}
-          <div className="hidden sm:block mt-8 text-slate-400 font-mono bg-slate-900/50 w-fit mx-auto px-6 py-3 rounded-full border border-slate-800">
+          <div className="hidden sm:block mt-8 text-slate-600 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-900/50 w-fit mx-auto px-6 py-3 rounded-full border border-slate-200 dark:border-slate-800 transition-colors">
              +91 9140884038
           </div>
         </motion.div>

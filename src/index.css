@@ -1,14 +1,25 @@
 @import "tailwindcss";
 
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   --font-sans: "Inter", "Sora", "Space Grotesk", sans-serif;
-  --color-background: #050505;
-  --color-foreground: #ededed;
   --color-primary: #3b82f6;
   --color-accent: #8b5cf6;
 }
 
 :root {
+  /* Light Mode Defaults */
+  --color-background: #f8fafc; /* slate-50 */
+  --color-foreground: #0f172a; /* slate-900 */
+}
+
+:root.dark {
+  /* Dark Mode Overrides */
+  --color-background: #050505;
+  --color-foreground: #ededed;
   color-scheme: dark;
 }
 

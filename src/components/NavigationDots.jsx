@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTransition } from '../App';
 
 const sections = [
   { id: 'hero', label: 'Home' },
@@ -12,6 +13,7 @@ const sections = [
 
 export const NavigationDots = () => {
   const [activeSection, setActiveSection] = useState('hero');
+  const { triggerTransition } = useTransition();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,11 +40,7 @@ export const NavigationDots = () => {
   }, []);
 
   const scrollToSection = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      // We can use native scroll behavior or let Lenis handle it if it intercepts
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    triggerTransition(id);
   };
 
   return (

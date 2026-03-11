@@ -51,8 +51,8 @@ const StarParticles = (props) => {
 
 export const Hero = () => {
   return (
-    <section id="hero" className="relative w-full h-screen mx-auto overflow-hidden bg-background">
-      <div className="absolute inset-0 z-0 opacity-60">
+    <section id="hero" className="relative w-full h-screen mx-auto overflow-hidden bg-slate-50 dark:bg-background transition-colors duration-500">
+      <div className="absolute inset-0 z-0 opacity-20 dark:opacity-60">
         <Canvas camera={{ position: [0, 0, 1] }}>
           <StarParticles />
         </Canvas>
@@ -75,7 +75,7 @@ export const Hero = () => {
           </motion.div>
 
           <motion.h1 
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-4 md:mb-6 bg-gradient-to-br from-white via-slate-300 to-slate-600 bg-clip-text text-transparent tracking-tighter"
+            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-4 md:mb-6 bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-300 dark:to-slate-600 bg-clip-text text-transparent tracking-tighter"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
@@ -84,7 +84,7 @@ export const Hero = () => {
           </motion.h1>
 
           <motion.h3 
-            className="text-xl sm:text-2xl md:text-4xl font-semibold text-slate-300 mb-6 md:mb-8 tracking-wide"
+            className="text-xl sm:text-2xl md:text-4xl font-semibold text-slate-700 dark:text-slate-300 mb-6 md:mb-8 tracking-wide transition-colors"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
@@ -93,7 +93,7 @@ export const Hero = () => {
           </motion.h3>
 
           <motion.p 
-            className="text-sm sm:text-base md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 md:mb-12 leading-relaxed font-light px-4 md:px-0"
+            className="text-sm sm:text-base md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10 md:mb-12 leading-relaxed font-light px-4 md:px-0 transition-colors"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
@@ -110,7 +110,7 @@ export const Hero = () => {
             <button 
               onClick={(e) => {
                 e.preventDefault();
-                document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' });
+                triggerTransition('experience');
               }}
               className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-full font-semibold transition-all hover:bg-blue-600 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] cursor-pointer text-sm sm:text-base"
             >
@@ -119,9 +119,9 @@ export const Hero = () => {
             <button 
               onClick={(e) => {
                 e.preventDefault();
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                triggerTransition('contact');
               }}
-              className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-transparent border border-slate-700 text-white rounded-full font-semibold transition-all hover:bg-slate-800 hover:border-slate-500 cursor-pointer text-sm sm:text-base"
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-transparent border border-slate-300 text-slate-800 dark:border-slate-700 dark:text-white rounded-full font-semibold transition-all hover:bg-slate-200 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 cursor-pointer text-sm sm:text-base"
             >
               Contact Me
             </button>
