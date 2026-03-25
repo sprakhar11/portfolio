@@ -76,7 +76,7 @@ export const experienceData = [
 export const educationData = [
   {
       id: 1,
-      degree: "B.Tech â Computer Science and Engineering",
+      degree: "B.Tech in Computer Science and Engineering",
       institution: "JSS Academy of Technical Education, Noida",
       period: "2020 - 2024",
       score: "CGPA: 8.47"
