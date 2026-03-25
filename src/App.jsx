@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CustomCursor } from './components/CustomCursor';
 import { SmoothScroll } from './components/SmoothScroll';
@@ -12,11 +12,19 @@ import { Projects } from './sections/Projects';
 import { Contact } from './sections/Contact';
 import { AdminPage } from './pages/AdminPage';
 import { siteConfig } from './config/siteConfig';
-import { Mail } from 'lucide-react';
+import { Mail, FileDown } from 'lucide-react';
 import './App.css';
 
 const Portfolio = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasResume, setHasResume] = useState(false);
+
+  useEffect(() => {
+    // Check if resume.pdf exists
+    fetch(`${import.meta.env.BASE_URL}resume.pdf`, { method: 'HEAD' })
+      .then(res => setHasResume(res.ok && res.headers.get('content-type')?.includes('pdf')))
+      .catch(() => setHasResume(false));
+  }, []);
 
   return (
     <SmoothScroll>
@@ -33,6 +41,19 @@ const Portfolio = () => {
       </button>
 
       <AnonymousMessageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      {/* Floating Resume download button — top right */}
+      {hasResume && (
+        <a
+          href={`${import.meta.env.BASE_URL}resume.pdf`}
+          download="Prakhar_Sharma_Resume.pdf"
+          className="fixed top-5 right-5 z-[999] flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/20 hover:bg-white/20 hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300"
+          title="Download Resume"
+        >
+          <FileDown size={16} />
+          Resume
+        </a>
+      )}
 
       <main className="bg-background text-foreground min-h-screen">
         <Hero />

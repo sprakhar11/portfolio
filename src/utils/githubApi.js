@@ -56,6 +56,48 @@ export async function updateFileContent(token, path, content, sha, message) {
 }
 
 /**
+ * Upload a binary file (e.g. PDF) to the repo
+ */
+export async function uploadBinaryFile(token, path, base64Content, sha, message) {
+  const body = {
+    message: message || `Upload ${path} via admin panel`,
+    content: base64Content,
+    branch: BRANCH,
+  };
+  if (sha) body.sha = sha; // update existing file
+
+  const res = await fetch(
+    `${GITHUB_API}/repos/${OWNER}/${REPO}/contents/${path}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    }
+  );
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Failed to upload file');
+  }
+  return await res.json();
+}
+
+/**
+ * Check if a file exists in the repo (returns sha or null)
+ */
+export async function checkFileExists(token, path) {
+  const res = await fetch(
+    `${GITHUB_API}/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.sha;
+}
+
+/**
  * Parse siteConfig.js content into a plain object
  */
 export function parseSiteConfig(raw) {

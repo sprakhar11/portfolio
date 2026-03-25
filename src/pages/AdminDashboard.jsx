@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save, Loader2, CheckCircle, AlertCircle, LogOut, Plus, Trash2,
-  User, Briefcase, GraduationCap, Trophy
+  User, Briefcase, GraduationCap, Trophy, FileText, Upload
 } from 'lucide-react';
 import {
-  getFileContent, updateFileContent,
+  getFileContent, updateFileContent, uploadBinaryFile, checkFileExists,
   parseSiteConfig, serializeSiteConfig,
   parseAchievementsFile, serializeAchievementsFile
 } from '../utils/githubApi';
@@ -15,6 +15,7 @@ const TABS = [
   { id: 'experience', label: 'Experience', icon: Briefcase },
   { id: 'education', label: 'Education', icon: GraduationCap },
   { id: 'achievements', label: 'Achievements', icon: Trophy },
+  { id: 'resume', label: 'Resume', icon: FileText },
 ];
 
 const inputClass = `w-full bg-slate-900/80 text-slate-200 rounded-lg px-3 py-2.5 outline-none
@@ -51,6 +52,7 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
   const [experienceData, setExperienceData] = useState([]);
   const [educationData, setEducationData] = useState([]);
   const [achievementsSha, setAchievementsSha] = useState('');
+  const [resumeSha, setResumeSha] = useState(null);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -78,6 +80,10 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
         setEducationData(achData.educationData);
         setAchievementsSha(achievementsFile.sha);
       }
+
+      // Check if resume exists
+      const rSha = await checkFileExists(token, 'public/resume.pdf');
+      setResumeSha(rSha);
     } catch (err) {
       showToast(`Failed to load data: ${err.message}`, 'error');
     } finally {
@@ -115,8 +121,28 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
     }
   };
 
+  const handleResumeUpload = async (file) => {
+    setSaving(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadBinaryFile(token, 'public/resume.pdf', base64, resumeSha, '📄 Upload resume via admin panel');
+      setResumeSha(result.content.sha);
+      showToast('Resume uploaded & committed!');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSave = () => {
     if (activeTab === 'siteConfig') return handleSaveSiteConfig();
+    if (activeTab === 'resume') return; // resume saves on upload
     return handleSaveAchievements();
   };
 
@@ -206,6 +232,9 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
           )}
           {activeTab === 'achievements' && (
             <AchievementsEditor data={achievements} onChange={setAchievements} />
+          )}
+          {activeTab === 'resume' && (
+            <ResumeEditor hasResume={!!resumeSha} onUpload={handleResumeUpload} saving={saving} />
           )}
         </div>
       </div>
@@ -461,6 +490,81 @@ const AchievementsEditor = ({ data, onChange }) => {
       <button onClick={addEntry} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
         <Plus size={16} /> Add Achievement
       </button>
+    </div>
+  );
+};
+
+const ResumeEditor = ({ hasResume, onUpload, saving }) => {
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFile = (file) => {
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      alert('Please upload a PDF file.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File too large (max 10MB).');
+      return;
+    }
+    onUpload(file);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div className={`w-3 h-3 rounded-full ${hasResume ? 'bg-green-400' : 'bg-slate-600'}`} />
+        <span className="text-sm text-slate-300">
+          {hasResume ? 'Resume is currently uploaded' : 'No resume uploaded yet'}
+        </span>
+        {hasResume && (
+          <a
+            href={`https://raw.githubusercontent.com/sprakhar11/portfolio/main/public/resume.pdf`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-blue-400 hover:text-blue-300 underline"
+          >
+            View current
+          </a>
+        )}
+      </div>
+
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
+        onClick={() => fileInputRef.current?.click()}
+        className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${
+          dragOver
+            ? 'border-blue-400 bg-blue-500/10'
+            : 'border-slate-700 hover:border-slate-500 hover:bg-slate-900/50'
+        }`}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf"
+          className="hidden"
+          onChange={(e) => handleFile(e.target.files[0])}
+        />
+        {saving ? (
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 size={32} className="animate-spin text-blue-400" />
+            <p className="text-slate-300 font-medium">Uploading to GitHub...</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-3">
+            <Upload size={32} className="text-slate-500" />
+            <p className="text-slate-300 font-medium">
+              {hasResume ? 'Replace resume' : 'Upload resume'}
+            </p>
+            <p className="text-slate-500 text-sm">
+              Drag & drop a PDF here, or click to browse
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
