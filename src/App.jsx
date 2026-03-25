@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CustomCursor } from './components/CustomCursor';
 import { SmoothScroll } from './components/SmoothScroll';
 import { NavigationDots } from './components/NavigationDots';
@@ -9,11 +10,12 @@ import { Experience } from './sections/Experience';
 import { Achievements } from './sections/Achievements';
 import { Projects } from './sections/Projects';
 import { Contact } from './sections/Contact';
+import { AdminPage } from './pages/AdminPage';
 import { siteConfig } from './config/siteConfig';
 import { Mail } from 'lucide-react';
 import './App.css';
 
-function App() {
+const Portfolio = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -44,6 +46,17 @@ function App() {
         <p className="tracking-wide">Built by <span className="text-slate-300">{siteConfig.name}</span>.<br className="md:hidden" /> Designed with ♥️</p>
       </footer>
     </SmoothScroll>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter basename="/portfolio">
+      <Routes>
+        <Route path="/" element={<Portfolio />} />
+        <Route path="/admin" element={<AdminPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

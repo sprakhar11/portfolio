@@ -1,0 +1,466 @@
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Save, Loader2, CheckCircle, AlertCircle, LogOut, Plus, Trash2,
+  User, Briefcase, GraduationCap, Trophy
+} from 'lucide-react';
+import {
+  getFileContent, updateFileContent,
+  parseSiteConfig, serializeSiteConfig,
+  parseAchievementsFile, serializeAchievementsFile
+} from '../utils/githubApi';
+
+const TABS = [
+  { id: 'siteConfig', label: 'Site Config', icon: User },
+  { id: 'experience', label: 'Experience', icon: Briefcase },
+  { id: 'education', label: 'Education', icon: GraduationCap },
+  { id: 'achievements', label: 'Achievements', icon: Trophy },
+];
+
+const inputClass = `w-full bg-slate-900/80 text-slate-200 rounded-lg px-3 py-2.5 outline-none
+  placeholder:text-slate-600 transition-all text-sm
+  focus:ring-2 focus:ring-blue-500/30 border border-slate-700 focus:border-blue-500/50`;
+
+const labelClass = 'block text-xs text-slate-400 font-medium mb-1.5 uppercase tracking-wider';
+
+const Toast = ({ message, type, onClose }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 40 }}
+    className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium shadow-2xl ${
+      type === 'success' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
+    }`}
+  >
+    {type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+    {message}
+    <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">✕</button>
+  </motion.div>
+);
+
+export const AdminDashboard = ({ token, user, onLogout }) => {
+  const [activeTab, setActiveTab] = useState('siteConfig');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  // Data states
+  const [siteConfig, setSiteConfig] = useState(null);
+  const [siteConfigSha, setSiteConfigSha] = useState('');
+  const [achievements, setAchievements] = useState([]);
+  const [experienceData, setExperienceData] = useState([]);
+  const [educationData, setEducationData] = useState([]);
+  const [achievementsSha, setAchievementsSha] = useState('');
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [configFile, achievementsFile] = await Promise.all([
+        getFileContent(token, 'src/config/siteConfig.js'),
+        getFileContent(token, 'src/data/achievements.js'),
+      ]);
+
+      const config = parseSiteConfig(configFile.content);
+      if (config) {
+        setSiteConfig(config);
+        setSiteConfigSha(configFile.sha);
+      }
+
+      const achData = parseAchievementsFile(achievementsFile.content);
+      if (achData) {
+        setAchievements(achData.achievements);
+        setExperienceData(achData.experienceData);
+        setEducationData(achData.educationData);
+        setAchievementsSha(achievementsFile.sha);
+      }
+    } catch (err) {
+      showToast(`Failed to load data: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleSaveSiteConfig = async () => {
+    setSaving(true);
+    try {
+      const content = serializeSiteConfig(siteConfig);
+      const result = await updateFileContent(token, 'src/config/siteConfig.js', content, siteConfigSha, '🔧 Update site config via admin panel');
+      setSiteConfigSha(result.content.sha);
+      showToast('Site config saved & committed!');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveAchievements = async () => {
+    setSaving(true);
+    try {
+      const content = serializeAchievementsFile({ achievements, experienceData, educationData });
+      const result = await updateFileContent(token, 'src/data/achievements.js', content, achievementsSha, '🔧 Update portfolio data via admin panel');
+      setAchievementsSha(result.content.sha);
+      showToast('Data saved & committed!');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSave = () => {
+    if (activeTab === 'siteConfig') return handleSaveSiteConfig();
+    return handleSaveAchievements();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-blue-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0a0f1a] text-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-slate-800 bg-[#0a0f1a]/80 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-xs font-bold">
+              {user?.login?.[0]?.toUpperCase() || 'A'}
+            </div>
+            <div>
+              <p className="text-sm font-semibold">{user?.login}</p>
+              <p className="text-xs text-slate-500">Admin Panel</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+                bg-gradient-to-r from-blue-500 to-blue-600 text-white
+                hover:from-blue-600 hover:to-blue-700 disabled:opacity-40 cursor-pointer"
+            >
+              {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              Save & Deploy
+            </motion.button>
+            <button
+              onClick={onLogout}
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Logout"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Tabs */}
+      <div className="max-w-6xl mx-auto px-4 pt-4">
+        <div className="flex gap-1 bg-slate-900/50 rounded-xl p-1 border border-slate-800 w-fit">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                activeTab === tab.id
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <tab.icon size={14} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div
+          className="rounded-2xl p-6"
+          style={{
+            background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)',
+            border: '1px solid rgba(59, 130, 246, 0.1)',
+          }}
+        >
+          {activeTab === 'siteConfig' && siteConfig && (
+            <SiteConfigEditor config={siteConfig} onChange={setSiteConfig} />
+          )}
+          {activeTab === 'experience' && (
+            <ExperienceEditor data={experienceData} onChange={setExperienceData} />
+          )}
+          {activeTab === 'education' && (
+            <EducationEditor data={educationData} onChange={setEducationData} />
+          )}
+          {activeTab === 'achievements' && (
+            <AchievementsEditor data={achievements} onChange={setAchievements} />
+          )}
+        </div>
+      </div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+/* ========== SECTION EDITORS ========== */
+
+const SiteConfigEditor = ({ config, onChange }) => {
+  const update = (key, val) => onChange({ ...config, [key]: val });
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {[
+        { key: 'name', label: 'Full Name' },
+        { key: 'role', label: 'Role / Title' },
+        { key: 'email', label: 'Email' },
+        { key: 'githubUsername', label: 'GitHub Username' },
+        { key: 'linkedin', label: 'LinkedIn Handle' },
+        { key: 'twitter', label: 'Twitter Handle' },
+      ].map(({ key, label }) => (
+        <div key={key}>
+          <label className={labelClass}>{label}</label>
+          <input className={inputClass} value={config[key] || ''} onChange={(e) => update(key, e.target.value)} />
+        </div>
+      ))}
+      <div className="md:col-span-2">
+        <label className={labelClass}>Description / Bio</label>
+        <textarea
+          rows={3}
+          className={`${inputClass} resize-none`}
+          value={config.description || ''}
+          onChange={(e) => update('description', e.target.value)}
+        />
+      </div>
+    </div>
+  );
+};
+
+const ExperienceEditor = ({ data, onChange }) => {
+  const update = (idx, field, val) => {
+    const updated = [...data];
+    updated[idx] = { ...updated[idx], [field]: val };
+    onChange(updated);
+  };
+
+  const updateBullet = (expIdx, bulletIdx, val) => {
+    const updated = [...data];
+    const bullets = [...(updated[expIdx].bullets || [])];
+    bullets[bulletIdx] = val;
+    updated[expIdx] = { ...updated[expIdx], bullets };
+    onChange(updated);
+  };
+
+  const addBullet = (expIdx) => {
+    const updated = [...data];
+    updated[expIdx] = { ...updated[expIdx], bullets: [...(updated[expIdx].bullets || []), ''] };
+    onChange(updated);
+  };
+
+  const removeBullet = (expIdx, bulletIdx) => {
+    const updated = [...data];
+    const bullets = [...(updated[expIdx].bullets || [])];
+    bullets.splice(bulletIdx, 1);
+    updated[expIdx] = { ...updated[expIdx], bullets };
+    onChange(updated);
+  };
+
+  const addEntry = () => {
+    onChange([...data, { id: Date.now(), role: '', company: '', period: '', techStack: '', bullets: [''] }]);
+  };
+
+  const removeEntry = (idx) => {
+    const updated = [...data];
+    updated.splice(idx, 1);
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-8">
+      {data.map((exp, idx) => (
+        <div key={exp.id || idx} className="p-5 rounded-xl bg-slate-900/50 border border-slate-800 space-y-4">
+          <div className="flex justify-between items-start">
+            <span className="text-xs text-blue-400 font-mono">#{idx + 1}</span>
+            <button onClick={() => removeEntry(idx)} className="text-red-400 hover:text-red-300 p-1 cursor-pointer">
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Role</label>
+              <input className={inputClass} value={exp.role} onChange={(e) => update(idx, 'role', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Company</label>
+              <input className={inputClass} value={exp.company} onChange={(e) => update(idx, 'company', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Period</label>
+              <input className={inputClass} value={exp.period} onChange={(e) => update(idx, 'period', e.target.value)} placeholder="e.g. Sep 2025 - Present" />
+            </div>
+            <div>
+              <label className={labelClass}>Tech Stack</label>
+              <input className={inputClass} value={exp.techStack || ''} onChange={(e) => update(idx, 'techStack', e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Bullet Points</label>
+            <div className="space-y-2">
+              {(exp.bullets || []).map((bullet, bIdx) => (
+                <div key={bIdx} className="flex gap-2">
+                  <input
+                    className={`${inputClass} flex-1`}
+                    value={bullet}
+                    onChange={(e) => updateBullet(idx, bIdx, e.target.value)}
+                    placeholder="Describe an achievement or responsibility..."
+                  />
+                  <button onClick={() => removeBullet(idx, bIdx)} className="text-red-400 hover:text-red-300 p-2 cursor-pointer">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              <button onClick={() => addBullet(idx)} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1 cursor-pointer">
+                <Plus size={12} /> Add bullet
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+      <button onClick={addEntry} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
+        <Plus size={16} /> Add Experience
+      </button>
+    </div>
+  );
+};
+
+const EducationEditor = ({ data, onChange }) => {
+  const update = (idx, field, val) => {
+    const updated = [...data];
+    updated[idx] = { ...updated[idx], [field]: val };
+    onChange(updated);
+  };
+
+  const addEntry = () => {
+    onChange([...data, { id: Date.now(), degree: '', institution: '', period: '', score: '' }]);
+  };
+
+  const removeEntry = (idx) => {
+    const updated = [...data];
+    updated.splice(idx, 1);
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-6">
+      {data.map((edu, idx) => (
+        <div key={edu.id || idx} className="p-5 rounded-xl bg-slate-900/50 border border-slate-800 space-y-4">
+          <div className="flex justify-between items-start">
+            <span className="text-xs text-blue-400 font-mono">#{idx + 1}</span>
+            <button onClick={() => removeEntry(idx)} className="text-red-400 hover:text-red-300 p-1 cursor-pointer">
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Degree</label>
+              <input className={inputClass} value={edu.degree} onChange={(e) => update(idx, 'degree', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Institution</label>
+              <input className={inputClass} value={edu.institution} onChange={(e) => update(idx, 'institution', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Period</label>
+              <input className={inputClass} value={edu.period} onChange={(e) => update(idx, 'period', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Score</label>
+              <input className={inputClass} value={edu.score} onChange={(e) => update(idx, 'score', e.target.value)} placeholder="e.g. CGPA: 8.47" />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button onClick={addEntry} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
+        <Plus size={16} /> Add Education
+      </button>
+    </div>
+  );
+};
+
+const AchievementsEditor = ({ data, onChange }) => {
+  const update = (idx, field, val) => {
+    const updated = [...data];
+    updated[idx] = { ...updated[idx], [field]: val };
+    onChange(updated);
+  };
+
+  const addEntry = () => {
+    onChange([...data, { id: Date.now(), title: '', description: '', icon: 'Trophy' }]);
+  };
+
+  const removeEntry = (idx) => {
+    const updated = [...data];
+    updated.splice(idx, 1);
+    onChange(updated);
+  };
+
+  const iconOptions = ['Trophy', 'Code', 'Zap', 'Database', 'Shield', 'Server'];
+
+  return (
+    <div className="space-y-6">
+      {data.map((ach, idx) => (
+        <div key={ach.id || idx} className="p-5 rounded-xl bg-slate-900/50 border border-slate-800 space-y-4">
+          <div className="flex justify-between items-start">
+            <span className="text-xs text-blue-400 font-mono">#{idx + 1}</span>
+            <button onClick={() => removeEntry(idx)} className="text-red-400 hover:text-red-300 p-1 cursor-pointer">
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Title</label>
+              <input className={inputClass} value={ach.title} onChange={(e) => update(idx, 'title', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Icon</label>
+              <select
+                className={inputClass}
+                value={ach.icon}
+                onChange={(e) => update(idx, 'icon', e.target.value)}
+              >
+                {iconOptions.map(ic => <option key={ic} value={ic}>{ic}</option>)}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelClass}>Description</label>
+              <textarea
+                rows={2}
+                className={`${inputClass} resize-none`}
+                value={ach.description}
+                onChange={(e) => update(idx, 'description', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button onClick={addEntry} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
+        <Plus size={16} /> Add Achievement
+      </button>
+    </div>
+  );
+};
