@@ -8,18 +8,18 @@ export const achievements = [
   {
       id: 2,
       title: "Smart India Hackathon Winner",
-      description: "National Level Hackathon, Ministry of Education, 2022 â recognized for innovative technical solutions.",
+      description: "National Level Hackathon, Ministry of Education, 2022 Ã¢ÂÂ recognized for innovative technical solutions.",
       icon: "Zap"
   },
   {
       id: 3,
-      title: "ICPC Gwalior-Pune Regional â Rank 70",
+      title: "ICPC Gwalior-Pune Regional Ã¢ÂÂ Rank 70",
       description: "Secured 70th rank at Regionals and 139th at Prelims in ICPC 2021, demonstrating advanced algorithmic skills.",
       icon: "Code"
   },
   {
       id: 4,
-      title: "ICPC Kanpur-Mathura Regional â Rank 125",
+      title: "ICPC Kanpur-Mathura Regional Ã¢ÂÂ Rank 125",
       description: "Secured 125th rank at Regionals and 300th at Prelims in ICPC 2022.",
       icon: "Code"
   },
@@ -37,7 +37,7 @@ export const experienceData = [
       role: "Software Engineer",
       company: "Vittaka (Subsidiary of Equirus Wealth)",
       period: "Sep 2025 - Present",
-      techStack: "Kotlin, Java, Spring Boot, OpenSearch, PostgreSQL, MyBatis",
+      techStack: "Kotlin, Java, Spring Boot, ElasticSearch, PostgreSQL, MyBatis, ",
       bullets: [
       "Production Stability: Identified and fixed production deadlocks in batch jobs and OpenSearch sync by restructuring transaction boundaries and query execution order.",
       "Batch Scheduling Module: Designed a configurable batch/cron scheduling module from scratch for a SaaS multi-tenant platform, using dynamic JSON-based metadata allowing scheduling changes at runtime.",
@@ -50,7 +50,7 @@ export const experienceData = [
       role: "Software Engineer",
       company: "Equirus Wealth",
       period: "July 2024 - Aug 2025",
-      techStack: "Kotlin, Java, Spring Boot, OpenSearch, PostgreSQL, MyBatis",
+      techStack: "Kotlin, Java, Spring Boot, ElasticSearch, PostgreSQL, MyBatis",
       bullets: [
       "Fuzzy Search: Built a fuzzy search module using OpenSearch, enabling typo-tolerant search and improving result accuracy across the platform.",
       "CSV Export at Scale: Built a CSV export service that streams 1M+ records using batched reads and buffered writes, avoiding memory issues and timeouts.",
@@ -64,7 +64,7 @@ export const experienceData = [
       role: "Software Engineer Intern",
       company: "Equirus Wealth",
       period: "Feb 2024 - June 2024",
-      techStack: "Kotlin, Spring Boot, Redis, PostgreSQL",
+      techStack: "Kotlin, Spring Boot, Redis, PostgreSQL, ElasticSearch",
       bullets: [
       "Excel Report Generator: Built an Excel report generator with dynamic logos, auto-merge, and nested data rendering using Apache POI.",
       "API Development: Developed 30+ REST APIs with database indexing, cursor-based pagination, and schema-level input validation.",
