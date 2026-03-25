@@ -4,6 +4,6 @@ export const siteConfig = {
   linkedin: "sprakhar07",
   twitter: "",
   name: "Prakhar Sharma",
-  role: "Backend Engineer",
+  role: "Software Development Engineer",
   description: "I love to architect scalable systems from scratch, building robust APIs, optimizing databases, and ensuring secure data flow across complex architectures.",
 };
