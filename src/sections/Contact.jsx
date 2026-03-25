@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { siteConfig } from '../config/siteConfig';
 import { Mail, Linkedin, Github } from 'lucide-react';
+import { AnonymousMessageModal } from '../components/AnonymousMessageModal';
 
 export const Contact = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section id="contact" className="py-24 px-6 md:px-12 relative overflow-hidden">
       {/* Background glow */}
@@ -21,15 +25,15 @@ export const Contact = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
-            <motion.a
+            <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                href={`mailto:${siteConfig.email}`}
-                className="flex items-center justify-center gap-3 w-full sm:w-auto px-10 py-5 bg-white text-slate-900 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all"
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center justify-center gap-3 w-full sm:w-auto px-10 py-5 bg-white text-slate-900 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all cursor-pointer"
             >
               <Mail size={24} />
               Say Hello
-            </motion.a>
+            </motion.button>
 
             <div className="flex gap-4">
                <motion.a 
@@ -87,6 +91,9 @@ export const Contact = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Anonymous Message Modal */}
+      <AnonymousMessageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 };
