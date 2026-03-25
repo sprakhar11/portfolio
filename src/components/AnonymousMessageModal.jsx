@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 
-const API_URL = import.meta.env.DEV
-  ? 'http://localhost:3001'
-  : (import.meta.env.VITE_API_URL || '');
+const EMAILJS_SERVICE_ID = 'service_72juh0u';
+const EMAILJS_TEMPLATE_ID = 'template_hk3aejs';
+const EMAILJS_PUBLIC_KEY = '9PpuPXRQnOWS37syg';
 
 export const AnonymousMessageModal = ({ isOpen, onClose }) => {
   const [message, setMessage] = useState('');
@@ -50,27 +51,27 @@ export const AnonymousMessageModal = ({ isOpen, onClose }) => {
     setErrorMsg('');
 
     try {
-      const res = await fetch(`${API_URL}/api/send-message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message.trim() }),
-      });
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name: 'Anonymous Visitor',
+          title: 'Anonymous Message from Portfolio',
+          message: message.trim(),
+          email: '',
+          time: new Date().toLocaleString(),
+        },
+        EMAILJS_PUBLIC_KEY
+      );
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setStatus('success');
-        setMessage('');
-        setTimeout(() => {
-          onClose();
-          setStatus('idle');
-        }, 2500);
-      } else {
-        setErrorMsg(data.error || 'Something went wrong.');
-        setStatus('error');
-      }
+      setStatus('success');
+      setMessage('');
+      setTimeout(() => {
+        onClose();
+        setStatus('idle');
+      }, 2500);
     } catch {
-      setErrorMsg('Network error. Please try again.');
+      setErrorMsg('Failed to send message. Please try again.');
       setStatus('error');
     }
   };
@@ -124,6 +125,7 @@ export const AnonymousMessageModal = ({ isOpen, onClose }) => {
               <div>
                 <h3 className="text-xl font-bold text-white">Send Anonymous Message</h3>
                 <p className="text-slate-400 text-sm mt-1">Your identity stays hidden ✨</p>
+                <p className="text-slate-500 text-xs mt-1 italic">Psst… drop your contact if you want me to slide back into your inbox 😉</p>
               </div>
               <button
                 onClick={handleClose}

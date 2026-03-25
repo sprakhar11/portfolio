@@ -80,14 +80,20 @@ export const Contact = () => {
                </motion.a>
             </div>
             
-            <p className="mt-6 sm:mt-0 text-slate-500 font-mono text-sm block sm:hidden">
-              +91 9140884038
-            </p>
+            <div className="mt-6 sm:mt-0 flex flex-col items-center gap-2 block sm:hidden">
+              <a href="tel:+919140884038" className="text-slate-500 font-mono text-sm hover:text-white transition-colors">+91 9140884038</a>
+              <a href="mailto:prakhar.infinity@gmail.com" className="text-slate-500 font-mono text-sm hover:text-white transition-colors">prakhar.infinity@gmail.com</a>
+            </div>
           </div>
           
-          {/* Desktop visible phone number below links */}
-          <div className="hidden sm:block mt-8 text-slate-400 font-mono bg-slate-900/50 w-fit mx-auto px-6 py-3 rounded-full border border-slate-800">
-             +91 9140884038
+          {/* Desktop visible phone & email below links */}
+          <div className="hidden sm:flex mt-8 gap-4 items-center justify-center mx-auto w-fit">
+            <a href="tel:+919140884038" className="text-slate-400 font-mono bg-slate-900/50 px-6 py-3 rounded-full border border-slate-800 hover:text-white hover:border-slate-600 transition-colors">
+              +91 9140884038
+            </a>
+            <a href="mailto:prakhar.infinity@gmail.com" className="text-slate-400 font-mono bg-slate-900/50 px-6 py-3 rounded-full border border-slate-800 hover:text-white hover:border-slate-600 transition-colors">
+              prakhar.infinity@gmail.com
+            </a>
           </div>
         </motion.div>
       </div>
