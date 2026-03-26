@@ -47,6 +47,7 @@ const Portfolio = () => {
       {/* Floating Resume download button — top right */}
       {siteConfig.enableResumeDownload !== false && hasResume && (
         <a
+          id="resume-button-link"
           href={`${import.meta.env.BASE_URL}resume.pdf`}
           download="Prakhar_Sharma_Resume.pdf"
           className="fixed top-5 right-5 z-[999] flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/20 hover:bg-white/20 hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300"
