@@ -8,18 +8,18 @@ export const achievements = [
   {
       id: 2,
       title: "Smart India Hackathon Winner",
-      description: "National Level Hackathon, Ministry of Education, 2022 Ã¢ÂÂ recognized for innovative technical solutions.",
+      description: "National Level Hackathon, Ministry of Education, 2022 recognized for innovative technical solutions.",
       icon: "Zap"
   },
   {
       id: 3,
-      title: "ICPC Gwalior-Pune Regional Ã¢ÂÂ Rank 70",
+      title: "ICPC Gwalior-Pune Regional ÃÂ¢ÃÂÃÂ Rank 70",
       description: "Secured 70th rank at Regionals and 139th at Prelims in ICPC 2021, demonstrating advanced algorithmic skills.",
       icon: "Code"
   },
   {
       id: 4,
-      title: "ICPC Kanpur-Mathura Regional Ã¢ÂÂ Rank 125",
+      title: "ICPC Kanpur-Mathura Regional Rank 125",
       description: "Secured 125th rank at Regionals and 300th at Prelims in ICPC 2022.",
       icon: "Code"
   },
