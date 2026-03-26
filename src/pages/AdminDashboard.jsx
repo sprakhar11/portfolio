@@ -2,16 +2,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save, Loader2, CheckCircle, AlertCircle, LogOut, Plus, Trash2,
-  User, Briefcase, GraduationCap, Trophy, FileText, Upload
+  User, Briefcase, GraduationCap, Trophy, FileText, Upload, Zap
 } from 'lucide-react';
 import {
   getFileContent, updateFileContent, uploadBinaryFile, checkFileExists,
   parseSiteConfig, serializeSiteConfig,
-  parseAchievementsFile, serializeAchievementsFile
+  parseAchievementsFile, serializeAchievementsFile,
+  parseSkillsFile, serializeSkillsFile
 } from '../utils/githubApi';
 
 const TABS = [
   { id: 'siteConfig', label: 'Site Config', icon: User },
+  { id: 'skills', label: 'Skills', icon: Zap },
   { id: 'experience', label: 'Experience', icon: Briefcase },
   { id: 'education', label: 'Education', icon: GraduationCap },
   { id: 'achievements', label: 'Achievements', icon: Trophy },
@@ -52,6 +54,8 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
   const [experienceData, setExperienceData] = useState([]);
   const [educationData, setEducationData] = useState([]);
   const [achievementsSha, setAchievementsSha] = useState('');
+  const [skillsData, setSkillsData] = useState([]);
+  const [skillsSha, setSkillsSha] = useState('');
   const [resumeSha, setResumeSha] = useState(null);
 
   const showToast = (message, type = 'success') => {
@@ -62,9 +66,10 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [configFile, achievementsFile] = await Promise.all([
+      const [configFile, achievementsFile, skillsFile] = await Promise.all([
         getFileContent(token, 'src/config/siteConfig.js'),
         getFileContent(token, 'src/data/achievements.js'),
+        getFileContent(token, 'src/data/skills.js'),
       ]);
 
       const config = parseSiteConfig(configFile.content);
@@ -79,6 +84,12 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
         setExperienceData(achData.experienceData);
         setEducationData(achData.educationData);
         setAchievementsSha(achievementsFile.sha);
+      }
+
+      const parsedSkills = parseSkillsFile(skillsFile.content);
+      if (parsedSkills) {
+        setSkillsData(parsedSkills);
+        setSkillsSha(skillsFile.sha);
       }
 
       // Check if resume exists
@@ -121,6 +132,20 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
     }
   };
 
+  const handleSaveSkills = async () => {
+    setSaving(true);
+    try {
+      const content = serializeSkillsFile(skillsData);
+      const result = await updateFileContent(token, 'src/data/skills.js', content, skillsSha, '🎯 Update skills via admin panel');
+      setSkillsSha(result.content.sha);
+      showToast('Skills saved & committed!');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleResumeUpload = async (file) => {
     setSaving(true);
     try {
@@ -142,6 +167,7 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
 
   const handleSave = () => {
     if (activeTab === 'siteConfig') return handleSaveSiteConfig();
+    if (activeTab === 'skills') return handleSaveSkills();
     if (activeTab === 'resume') return; // resume saves on upload
     return handleSaveAchievements();
   };
@@ -224,6 +250,9 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
           {activeTab === 'siteConfig' && siteConfig && (
             <SiteConfigEditor config={siteConfig} onChange={setSiteConfig} />
           )}
+          {activeTab === 'skills' && (
+            <SkillsEditor data={skillsData} onChange={setSkillsData} />
+          )}
           {activeTab === 'experience' && (
             <ExperienceEditor data={experienceData} onChange={setExperienceData} />
           )}
@@ -249,32 +278,75 @@ export const AdminDashboard = ({ token, user, onLogout }) => {
 
 /* ========== SECTION EDITORS ========== */
 
+const ToggleSwitch = ({ label, checked, onChange }) => (
+  <div className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-slate-900/60 border border-slate-800">
+    <span className="text-sm text-slate-300">{label}</span>
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer ${
+        checked ? 'bg-blue-500' : 'bg-slate-700'
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+          checked ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  </div>
+);
+
 const SiteConfigEditor = ({ config, onChange }) => {
   const update = (key, val) => onChange({ ...config, [key]: val });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      {[
-        { key: 'name', label: 'Full Name' },
-        { key: 'role', label: 'Role / Title' },
-        { key: 'email', label: 'Email' },
-        { key: 'githubUsername', label: 'GitHub Username' },
-        { key: 'linkedin', label: 'LinkedIn Handle' },
-        { key: 'twitter', label: 'Twitter Handle' },
-      ].map(({ key, label }) => (
-        <div key={key}>
-          <label className={labelClass}>{label}</label>
-          <input className={inputClass} value={config[key] || ''} onChange={(e) => update(key, e.target.value)} />
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-sm font-semibold text-slate-300 mb-4 uppercase tracking-wider">Profile Info</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[
+            { key: 'name', label: 'Full Name' },
+            { key: 'role', label: 'Role / Title' },
+            { key: 'email', label: 'Email' },
+            { key: 'githubUsername', label: 'GitHub Username' },
+            { key: 'linkedin', label: 'LinkedIn Handle' },
+            { key: 'twitter', label: 'Twitter Handle' },
+          ].map(({ key, label }) => (
+            <div key={key}>
+              <label className={labelClass}>{label}</label>
+              <input className={inputClass} value={config[key] || ''} onChange={(e) => update(key, e.target.value)} />
+            </div>
+          ))}
+          <div className="md:col-span-2">
+            <label className={labelClass}>Description / Bio</label>
+            <textarea
+              rows={3}
+              className={`${inputClass} resize-none`}
+              value={config.description || ''}
+              onChange={(e) => update('description', e.target.value)}
+            />
+          </div>
         </div>
-      ))}
-      <div className="md:col-span-2">
-        <label className={labelClass}>Description / Bio</label>
-        <textarea
-          rows={3}
-          className={`${inputClass} resize-none`}
-          value={config.description || ''}
-          onChange={(e) => update('description', e.target.value)}
-        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-slate-300 mb-4 uppercase tracking-wider">Section Visibility</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <ToggleSwitch label="Skills" checked={config.showSkills !== false} onChange={(v) => update('showSkills', v)} />
+          <ToggleSwitch label="Experience" checked={config.showExperience !== false} onChange={(v) => update('showExperience', v)} />
+          <ToggleSwitch label="Achievements" checked={config.showAchievements !== false} onChange={(v) => update('showAchievements', v)} />
+          <ToggleSwitch label="Projects" checked={config.showProjects !== false} onChange={(v) => update('showProjects', v)} />
+          <ToggleSwitch label="Contact" checked={config.showContact !== false} onChange={(v) => update('showContact', v)} />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-slate-300 mb-4 uppercase tracking-wider">Feature Toggles</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <ToggleSwitch label="Email Service (Say Hello)" checked={config.enableEmailService !== false} onChange={(v) => update('enableEmailService', v)} />
+          <ToggleSwitch label="Resume Download" checked={config.enableResumeDownload !== false} onChange={(v) => update('enableResumeDownload', v)} />
+        </div>
       </div>
     </div>
   );
@@ -489,6 +561,118 @@ const AchievementsEditor = ({ data, onChange }) => {
       ))}
       <button onClick={addEntry} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
         <Plus size={16} /> Add Achievement
+      </button>
+    </div>
+  );
+};
+
+const ICON_LIBS = [
+  { value: 'fa', label: 'Font Awesome (Fa...)' },
+  { value: 'si', label: 'Simple Icons (Si...)' },
+  { value: 'vsc', label: 'VS Code Icons (Vsc...)' },
+  { value: 'lucide', label: 'Lucide' },
+];
+
+const SkillsEditor = ({ data, onChange }) => {
+  const updateCategory = (idx, field, val) => {
+    const updated = [...data];
+    updated[idx] = { ...updated[idx], [field]: val };
+    onChange(updated);
+  };
+
+  const updateItem = (catIdx, itemIdx, field, val) => {
+    const updated = [...data];
+    const items = [...updated[catIdx].items];
+    items[itemIdx] = { ...items[itemIdx], [field]: val };
+    updated[catIdx] = { ...updated[catIdx], items };
+    onChange(updated);
+  };
+
+  const addCategory = () => {
+    onChange([...data, { category: 'New Category', icon: 'Code2', items: [] }]);
+  };
+
+  const removeCategory = (idx) => {
+    const updated = [...data];
+    updated.splice(idx, 1);
+    onChange(updated);
+  };
+
+  const addItem = (catIdx) => {
+    const updated = [...data];
+    updated[catIdx] = {
+      ...updated[catIdx],
+      items: [...updated[catIdx].items, { name: '', iconLib: 'lucide', iconName: 'Zap', color: 'text-slate-400' }]
+    };
+    onChange(updated);
+  };
+
+  const removeItem = (catIdx, itemIdx) => {
+    const updated = [...data];
+    const items = [...updated[catIdx].items];
+    items.splice(itemIdx, 1);
+    updated[catIdx] = { ...updated[catIdx], items };
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-8">
+      {data.map((cat, catIdx) => (
+        <div key={catIdx} className="p-5 rounded-xl bg-slate-900/50 border border-slate-800 space-y-4">
+          <div className="flex justify-between items-start">
+            <span className="text-xs text-blue-400 font-mono">Category #{catIdx + 1}</span>
+            <button onClick={() => removeCategory(catIdx)} className="text-red-400 hover:text-red-300 p-1 cursor-pointer">
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Category Name</label>
+              <input className={inputClass} value={cat.category} onChange={(e) => updateCategory(catIdx, 'category', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Category Icon (lucide name)</label>
+              <input className={inputClass} value={cat.icon} onChange={(e) => updateCategory(catIdx, 'icon', e.target.value)} placeholder="e.g. Code2, Wrench, Users" />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Skills</label>
+            <div className="space-y-3">
+              {cat.items.map((item, itemIdx) => (
+                <div key={itemIdx} className="grid grid-cols-[1fr_auto_1fr_1fr_auto] gap-2 items-end">
+                  <div>
+                    <label className="block text-[10px] text-slate-500 mb-1">Skill Name</label>
+                    <input className={inputClass} value={item.name} onChange={(e) => updateItem(catIdx, itemIdx, 'name', e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 mb-1">Icon Lib</label>
+                    <select className={inputClass} value={item.iconLib} onChange={(e) => updateItem(catIdx, itemIdx, 'iconLib', e.target.value)}>
+                      {ICON_LIBS.map(lib => <option key={lib.value} value={lib.value}>{lib.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 mb-1">Icon Name</label>
+                    <input className={inputClass} value={item.iconName} onChange={(e) => updateItem(catIdx, itemIdx, 'iconName', e.target.value)} placeholder="e.g. FaJava, SiRedis" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 mb-1">Color Class</label>
+                    <input className={inputClass} value={item.color} onChange={(e) => updateItem(catIdx, itemIdx, 'color', e.target.value)} placeholder="e.g. text-orange-500" />
+                  </div>
+                  <button onClick={() => removeItem(catIdx, itemIdx)} className="text-red-400 hover:text-red-300 p-2 cursor-pointer mb-0.5">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              <button onClick={() => addItem(catIdx)} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1 cursor-pointer">
+                <Plus size={12} /> Add Skill
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+      <button onClick={addCategory} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
+        <Plus size={16} /> Add Category
       </button>
     </div>
   );

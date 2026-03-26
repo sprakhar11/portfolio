@@ -151,3 +151,99 @@ export const experienceData = ${stringify(experienceData)};
 export const educationData = ${stringify(educationData)};
 `;
 }
+
+/**
+ * Parse skills.js content into a plain JSON array of categories.
+ * Each category: { category, icon, items: [{ name, iconLib, iconName, color }] }
+ * iconLib is the import source prefix: "Fa" → react-icons/fa, "Si" → react-icons/si, etc.
+ * lucide icons use iconLib: "lucide"
+ */
+export function parseSkillsFile(raw) {
+  try {
+    // Extract import lines to build a reverse map: iconVarName → { lib, iconName }
+    const iconMeta = {};
+    const importRegex = /import\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/g;
+    let m;
+    while ((m = importRegex.exec(raw)) !== null) {
+      const names = m[1].split(',').map(s => s.trim()).filter(Boolean);
+      const from = m[2]; // e.g. 'react-icons/fa', 'lucide-react'
+      names.forEach(name => {
+        if (from === 'lucide-react') {
+          iconMeta[name] = { iconLib: 'lucide', iconName: name };
+        } else {
+          // e.g. react-icons/fa → "Fa", react-icons/si → "Si"
+          const lib = from.split('/').pop(); // "fa", "si", "vsc"
+          iconMeta[name] = { iconLib: lib, iconName: name };
+        }
+      });
+    }
+
+    // Strip imports and export, evaluate the array
+    const stripped = raw
+      .replace(/import\s*\{[^}]+\}\s*from\s*['"][^'"]+['"]\s*;?/g, '')
+      .replace(/export\s+const\s+skillsData\s*=\s*/, 'return ')
+      .replace(/;[\s]*$/, '');
+
+    // We can't eval icon references, so let's use regex to extract the data
+    const categories = [];
+    // Match each category object
+    const catRegex = /\{\s*category:\s*"([^"]+)",\s*icon:\s*"([^"]+)",\s*items:\s*\[([\s\S]*?)\]\s*\}/g;
+    let catMatch;
+    while ((catMatch = catRegex.exec(raw)) !== null) {
+      const catName = catMatch[1];
+      const catIcon = catMatch[2];
+      const itemsBlock = catMatch[3];
+
+      const items = [];
+      const itemRegex = /\{\s*name:\s*"([^"]+)",\s*Icon:\s*(\w+),\s*color:\s*"([^"]+)"\s*\}/g;
+      let itemMatch;
+      while ((itemMatch = itemRegex.exec(itemsBlock)) !== null) {
+        const name = itemMatch[1];
+        const iconVar = itemMatch[2];
+        const color = itemMatch[3];
+        const meta = iconMeta[iconVar] || { iconLib: 'lucide', iconName: iconVar };
+        items.push({ name, iconLib: meta.iconLib, iconName: meta.iconName, color });
+      }
+      categories.push({ category: catName, icon: catIcon, items });
+    }
+    return categories;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Serialize skills data back to skills.js with auto-generated imports
+ */
+export function serializeSkillsFile(data) {
+  // Collect all icons grouped by library
+  const iconsByLib = {}; // { "fa": Set(["FaJava",...]), "lucide": Set(["Lightbulb",...]) }
+  data.forEach(cat => {
+    cat.items.forEach(item => {
+      const lib = item.iconLib || 'lucide';
+      if (!iconsByLib[lib]) iconsByLib[lib] = new Set();
+      iconsByLib[lib].add(item.iconName);
+    });
+  });
+
+  // Generate import lines
+  const importLines = [];
+  Object.entries(iconsByLib).forEach(([lib, names]) => {
+    const sorted = [...names].sort();
+    if (lib === 'lucide') {
+      importLines.push(`import { ${sorted.join(', ')} } from 'lucide-react';`);
+    } else {
+      importLines.push(`import { ${sorted.join(', ')} } from 'react-icons/${lib}';`);
+    }
+  });
+
+  // Generate the data array
+  const categoriesStr = data.map(cat => {
+    const itemsStr = cat.items.map(item =>
+      `      { name: "${item.name}", Icon: ${item.iconName}, color: "${item.color}" }`
+    ).join(',\n');
+    return `  {\n    category: "${cat.category}",\n    icon: "${cat.icon}",\n    items: [\n${itemsStr}\n    ]\n  }`;
+  }).join(',\n');
+
+  return `${importLines.join('\n')}\n\nexport const skillsData = [\n${categoriesStr}\n];\n`;
+}

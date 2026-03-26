@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { siteConfig } from '../config/siteConfig';
 
-const sections = [
+const allSections = [
   { id: 'hero', label: 'Home' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'achievements', label: 'Impact' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'contact', label: 'Contact' }
+  { id: 'skills', label: 'Skills', configKey: 'showSkills' },
+  { id: 'experience', label: 'Experience', configKey: 'showExperience' },
+  { id: 'achievements', label: 'Impact', configKey: 'showAchievements' },
+  { id: 'projects', label: 'Projects', configKey: 'showProjects' },
+  { id: 'contact', label: 'Contact', configKey: 'showContact' }
 ];
+
+const sections = allSections.filter(s => !s.configKey || siteConfig[s.configKey] !== false);
 
 export const NavigationDots = () => {
   const [activeSection, setActiveSection] = useState('hero');

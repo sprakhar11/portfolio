@@ -6,4 +6,11 @@ export const siteConfig = {
   name: "Prakhar Sharma",
   role: "Software Development Engineer",
   description: "I love to architect scalable systems from scratch, building robust APIs, optimizing databases, and ensuring secure data flow across complex architectures.",
+  showSkills: true,
+  showExperience: true,
+  showAchievements: true,
+  showProjects: true,
+  showContact: true,
+  enableEmailService: true,
+  enableResumeDownload: true,
 };

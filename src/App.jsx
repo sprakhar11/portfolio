@@ -32,18 +32,20 @@ const Portfolio = () => {
       <NavigationDots />
 
       {/* Floating Say Hello button — top left */}
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="fixed top-5 left-5 z-[999] flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/20 hover:bg-white/20 hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300 cursor-pointer"
-      >
-        <Mail size={16} />
-        Say Hello
-      </button>
+      {siteConfig.enableEmailService !== false && (
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="fixed top-5 left-5 z-[999] flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/20 hover:bg-white/20 hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300 cursor-pointer"
+        >
+          <Mail size={16} />
+          Say Hello
+        </button>
+      )}
 
       <AnonymousMessageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Floating Resume download button — top right */}
-      {hasResume && (
+      {siteConfig.enableResumeDownload !== false && hasResume && (
         <a
           href={`${import.meta.env.BASE_URL}resume.pdf`}
           download="Prakhar_Sharma_Resume.pdf"
@@ -57,11 +59,11 @@ const Portfolio = () => {
 
       <main className="bg-background text-foreground min-h-screen">
         <Hero />
-        <Skills />
-        <Experience />
-        <Achievements />
-        <Projects />
-        <Contact />
+        {siteConfig.showSkills !== false && <Skills />}
+        {siteConfig.showExperience !== false && <Experience />}
+        {siteConfig.showAchievements !== false && <Achievements />}
+        {siteConfig.showProjects !== false && <Projects />}
+        {siteConfig.showContact !== false && <Contact />}
       </main>
       <footer className="text-center py-10 bg-black text-slate-500 text-sm border-t border-slate-900">
         <p className="tracking-wide">Built by <span className="text-slate-300">{siteConfig.name}</span>.<br className="md:hidden" /> Designed with ♥️</p>

@@ -10,6 +10,8 @@ A modern, visually unique, and static React.js developer portfolio built with Vi
 - **Dynamic Content**: GitHub API integration to fetch and display top repositories dynamically
 - **Interactive UI**: Magnetic buttons, custom animated cursor, hover card tilts
 - **Responsive Design**: Fully optimized for Mobile, Tablet, and Desktop
+- **Admin Panel**: Secure browser-based admin panel to manage all site content
+- **Anonymous Messaging**: Visitors can send anonymous messages via EmailJS integration
 
 ## Setup & Local Development
 
@@ -32,8 +34,70 @@ A modern, visually unique, and static React.js developer portfolio built with Vi
 
 ## Configuration
 
-Edit core portfolio metadata and GitHub integration settings in `src/config/siteConfig.js`. 
-To modify your parsed achievements, edit `src/data/achievements.js`.
+### Site Config (`src/config/siteConfig.js`)
+
+Core portfolio metadata and toggle settings:
+
+| Field | Description |
+|---|---|
+| `name`, `role`, `email` | Profile information |
+| `githubUsername`, `linkedin`, `twitter` | Social links |
+| `description` | Bio displayed in the hero section |
+| `showSkills` | Toggle Skills section visibility |
+| `showExperience` | Toggle Experience section visibility |
+| `showAchievements` | Toggle Achievements section visibility |
+| `showProjects` | Toggle Projects (GitHub repos) section visibility |
+| `showContact` | Toggle Contact section visibility |
+| `enableEmailService` | Toggle the anonymous "Say Hello" email button |
+| `enableResumeDownload` | Toggle the floating resume download button |
+
+All toggle fields default to `true`. Set any to `false` to hide the corresponding section or feature.
+
+### Data Files
+
+- **`src/data/achievements.js`** — Experience, education, and achievements data
+- **`src/data/skills.js`** — Skill categories and items with icon mappings
+
+## Admin Panel
+
+Access the admin panel at `/admin`. It uses GitHub Personal Access Token (PAT) authentication to commit changes directly to the repository.
+
+### Features
+
+| Tab | What you can manage |
+|---|---|
+| **Site Config** | Profile info, section visibility toggles, feature toggles |
+| **Skills** | Skill categories and individual skills (name, icon, color) |
+| **Experience** | Work experience entries with bullet points |
+| **Education** | Education entries |
+| **Achievements** | Achievement cards with icons |
+| **Resume** | Upload/replace resume PDF |
+
+### How It Works
+
+1. Navigate to `your-site.com/admin`
+2. Enter your GitHub PAT (needs `repo` scope)
+3. Edit any content through the admin UI
+4. Click **Save & Deploy** — changes are committed directly to the `main` branch
+5. GitHub Actions automatically rebuilds and deploys the site
+
+### Skills Management
+
+The Skills editor lets you manage skill categories (Languages, Tools & Frameworks, Soft Skills, etc.) and individual skills within each category. For each skill, specify:
+
+- **Skill Name** — Display name (e.g., "Java", "Redis")
+- **Icon Library** — Source library: Font Awesome (`fa`), Simple Icons (`si`), VS Code Icons (`vsc`), or Lucide (`lucide`)
+- **Icon Name** — The exact component name (e.g., `FaJava`, `SiRedis`, `Lightbulb`)
+- **Color Class** — Tailwind color class (e.g., `text-orange-500`)
+
+### Section Toggles
+
+Toggle individual sections on/off from the **Site Config** tab without deleting any data. Sections include: Skills, Experience, Achievements, Projects, and Contact.
+
+### Feature Toggles
+
+- **Email Service** — Show/hide the floating "Say Hello" button
+- **Resume Download** — Show/hide the floating resume download button
 
 ## GitHub Pages Deployment
 
