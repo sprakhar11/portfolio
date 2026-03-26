@@ -13,7 +13,7 @@ export const achievements = [
   },
   {
       id: 3,
-      title: "ICPC Gwalior-Pune Regional ÃÂ¢ÃÂÃÂ Rank 70",
+      title: "ICPC Gwalior-Pune Regional Rank 70",
       description: "Secured 70th rank at Regionals and 139th at Prelims in ICPC 2021, demonstrating advanced algorithmic skills.",
       icon: "Code"
   },
